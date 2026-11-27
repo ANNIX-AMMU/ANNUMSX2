@@ -1,0 +1,29 @@
+name: ANNUMSX2 macOS ARM64 Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [enumsx2-a67l-blu-optimizations]
+    paths:
+      - "common/**"
+      - "pcsx2/**"
+      - "pcsx2-qt/**"
+      - "3rdparty/**"
+      - "cmake/**"
+      - ".github/workflows/annumsx2-macos.yml"
+
+concurrency:
+  group: annumsx2-macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos-arm64:
+    name: ANNUMSX2 macOS ARM64
+    uses: ./.github/workflows/macos_build.yml
+    with:
+      jobName: "ANNUMSX2 macOS arm64"
+      artifactPrefixName: "annumsx2-macos-arm64"
+      fetchTags: true
+      sign_and_notarize: false
+      require_notarization: false
+    secrets: inherit
