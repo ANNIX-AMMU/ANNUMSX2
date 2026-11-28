@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "modes": {
+    "standard": {
+      "surface": "system",
+      "opacity": 1.0,
+      "blurDp": 0,
+      "highlight": 0.0,
+      "oledBlack": false
+    },
+    "oledGlass": {
+      "surface": "#000000",
+      "opacity": 0.72,
+      "blurDp": 18,
+      "highlight": 0.14,
+      "oledBlack": true
+    },
+    "classicGlass": {
+      "surface": "#20242B",
+      "opacity": 0.78,
+      "blurDp": 14,
+      "highlight": 0.2,
+      "oledBlack": false
+    }
+  },
+  "performance": {
+    "lowEnd": {
+      "blurDpMax": 6,
+      "disableAnimatedRefraction": true,
+      "disableBackgroundSampling": true
+    },
+    "normal": {
+      "blurDpMax": 18,
+      "disableAnimatedRefraction": false,
+      "disableBackgroundSampling": false
+    }
+  }
+}
