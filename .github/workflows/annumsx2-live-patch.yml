@@ -1,0 +1,18 @@
+name: ANNUMSX2 Live Patch Validation
+on:
+  workflow_dispatch:
+  push:
+    branches: [enumsx2-a67l-blu-optimizations]
+jobs:
+  validate-live-patch:
+    if: github.repository == 'ANNIX-AMMU/ANNUMSX2'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply ANNUMSX2-only live patch
+        run: bash .github/workflows/scripts/annumsx2-live-patch.sh
+      - name: Verify ANNUMSX2 identity
+        run: |
+          grep -q 'ANNUMSX2' platforms/android/app/src/main/res/values/strings.xml
+          grep -q 'Repository=ANNIX-AMMU/ANNUMSX2' ANNUMSX2_BUILD_IDENTITY.txt
+          grep -q 'Branch=enumsx2-a67l-blu-optimizations' ANNUMSX2_BUILD_IDENTITY.txt
