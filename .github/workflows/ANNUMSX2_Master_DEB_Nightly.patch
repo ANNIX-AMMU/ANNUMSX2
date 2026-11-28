@@ -1,0 +1,64 @@
+diff --git a/.github/workflows/annumsx2-deb.yml b/.github/workflows/annumsx2-deb.yml
+index dcd9cbb..ab99f0c 100644
+--- a/.github/workflows/annumsx2-deb.yml
++++ b/.github/workflows/annumsx2-deb.yml
+@@ -1,8 +1,11 @@
+ name: ANNUMSX2 Linux ARM64 DEB
+ on:
+   workflow_dispatch:
++  workflow_call:
+   push:
+     branches: [enumsx2-a67l-blu-optimizations]
++permissions:
++  contents: read
+ jobs:
+   deb:
+     runs-on: ubuntu-24.04-arm
+@@ -21,4 +24,5 @@ jobs:
+         with:
+           name: ANNUMSX2-linux-arm64-deb-${{ github.sha }}
+           path: ci-artifacts/*.deb
++          if-no-files-found: error
+           retention-days: 30
+diff --git a/.github/workflows/build-all.yml b/.github/workflows/build-all.yml
+index 962fe94..e0923fc 100644
+--- a/.github/workflows/build-all.yml
++++ b/.github/workflows/build-all.yml
+@@ -3,6 +3,7 @@
+ # One push to the default branch fans out to every supported target and uploads
+ # an individual binary artifact per platform:
+ #   * PC arm64 Qt GUI  -> macOS, Linux, Windows  (reuses the reusable workflows)
++#   * Linux arm64 DEB  -> ANNUMSX2 desktop package on master
+ #   * Android APK       -> platforms/android  (Gradle + NDK, thin CMake on root core)
+ #   * iOS .app          -> platforms/ios      (Xcode/CMake on root core)
+ #
+@@ -64,6 +65,12 @@ jobs:
+       cmakeflags: ""
+       buildAppImage: true
+ 
++  # ---- Linux arm64 DEB (master pushes and master manual runs) ------------
++  pc-linux-arm64-deb:
++    name: PC · Linux arm64 (DEB)
++    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
++    uses: ./.github/workflows/annumsx2-deb.yml
++
+   # ---- libretro core (linux arm64) ---------------------------------------
+   pc-linux-arm64-libretro:
+     name: PC · Linux arm64 (libretro core)
+diff --git a/.github/workflows/nightly.yml b/.github/workflows/nightly.yml
+index eba4828..5e711d1 100644
+--- a/.github/workflows/nightly.yml
++++ b/.github/workflows/nightly.yml
+@@ -26,10 +26,10 @@ concurrency:
+   cancel-in-progress: false
+ 
+ jobs:
+-  # ---- gate: skip empty nights; never run on forks -----------------------
++  # ---- gate: skip empty nights; only publish from ANNUMSX2 master -----------------------
+   gate:
+     name: Decide whether to build
+-    if: ${{ github.repository == 'ARMSX2/ARMSX2' }}
++    if: ${{ github.repository == 'ANNIX-AMMU/ANNUMSX2' && github.ref == 'refs/heads/master' }}
+     runs-on: ubuntu-latest
+     outputs:
+       proceed: ${{ steps.check.outputs.proceed }}
