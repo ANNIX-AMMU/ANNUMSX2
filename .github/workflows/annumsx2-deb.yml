@@ -1,0 +1,24 @@
+name: ANNUMSX2 Linux ARM64 DEB
+on:
+  workflow_dispatch:
+  push:
+    branches: [enumsx2-a67l-blu-optimizations]
+jobs:
+  deb:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install -y build-essential clang cmake ninja-build pkg-config ccache nasm libasound2-dev libaio-dev libcurl4-openssl-dev libdbus-1-dev libdecor-0-dev libegl-dev libevdev-dev libfontconfig-dev libfreetype-dev libgtk-3-dev libharfbuzz-dev libinput-dev libopengl-dev libopus-dev libpcap-dev libpipewire-0.3-dev libpulse-dev libssl-dev libudev-dev libva-dev libwayland-dev libx11-dev libx11-xcb-dev libx264-dev libxcb1-dev libxcb-cursor-dev libxcb-glx0-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-present-dev libxcb-randr0-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-sync-dev libxcb-util-dev libxcb-xfixes0-dev libxcb-xinput-dev libxcb-xkb-dev libxext-dev libxkbcommon-x11-dev libxrandr-dev zlib1g-dev
+      - run: .github/workflows/scripts/linux/build-dependencies-qt.sh "$HOME/deps"
+      - run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$HOME/deps" -DDISABLE_ADVANCE_SIMD=TRUE -DENABLE_SETCAP=OFF
+      - run: cmake --build build --parallel
+      - name: Package DEB
+        env: {VERSION: "0.1.2"}
+        run: bash .github/workflows/scripts/linux/package-annumsx2-deb.sh "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/build" "$GITHUB_WORKSPACE/ci-artifacts"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ANNUMSX2-linux-arm64-deb-${{ github.sha }}
+          path: ci-artifacts/*.deb
+          retention-days: 30
