@@ -1,4 +1,4 @@
-```yaml
+
 name: ANNUMSX2 Linux ARM64 DEB
 on:
   workflow_dispatch:
@@ -30,4 +30,4 @@ jobs:
           name: ANNUMSX2-linux-arm64-deb-${{ github.sha }}
           path: ci-artifacts/*.deb
           retention-days: 30
-```
+
