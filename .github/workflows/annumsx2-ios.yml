@@ -1,0 +1,32 @@
+name: ANNUMSX2 iOS ARM64
+on:
+  workflow_dispatch:
+  push:
+    branches: [enumsx2-a67l-blu-optimizations]
+    paths: ["common/**","pcsx2/**","platforms/ios/**",".github/workflows/annumsx2-ios.yml"]
+jobs:
+  ios:
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v7
+        with: {submodules: recursive}
+      - run: sudo xcode-select -switch /Applications/Xcode.app
+      - run: rustup target add aarch64-apple-ios
+      - run: brew install ninja
+      - run: platforms/ios/scripts/build-ios-core.sh device
+      - working-directory: platforms/ios
+        run: cmake -G Xcode -B build/device -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DARMSX2_REAL_DEVICE=ON
+      - working-directory: platforms/ios
+        run: cmake --build build/device --config Release -- -sdk iphoneos CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+      - name: Package IPA
+        run: |
+          APP="$(find platforms/ios/build/device -name 'ARMSX2iOS.app' -type d | head -1)"
+          test -n "$APP"
+          S="$(mktemp -d)"; mkdir -p "$S/Payload"
+          cp -R "$APP" "$S/Payload/ANNUMSX2.app"
+          (cd "$S" && zip -qr "$GITHUB_WORKSPACE/ANNUMSX2-iOS-${GITHUB_SHA::8}.ipa" Payload)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ANNUMSX2-iOS-${{ github.sha }}
+          path: ANNUMSX2-iOS-*.ipa
+          retention-days: 14
